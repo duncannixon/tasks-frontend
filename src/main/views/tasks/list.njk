@@ -1,0 +1,94 @@
+{% extends "template.njk" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/task-list/macro.njk" import govukTaskList %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% set taskItems = [] %}
+
+{% for task in tasks %}
+  {% set statusText = "" %}
+  {% if task.status == "pending" %}
+    {% set statusText = "Not started" %}
+  {% elseif task.status == "in-progress" %}
+    {% set statusText = "In progress" %}
+  {% elseif task.status == "complete" %}
+    {% set statusText = "Complete" %}
+  {% endif %}
+
+  {% set statusClass = "" %}
+  {% if task.status == "pending" %}
+    {% set statusClass = "govuk-tag--yellow" %}
+  {% elseif task.status == "in-progress" %}
+    {% set statusClass = "govuk-tag--blue" %}
+  {% elseif task.status == "complete" %}
+    {% set statusClass = "govuk-tag--green" %}
+  {% endif %}
+
+  {% set taskItems = taskItems.concat([
+    {
+      title: {
+        text: task.title
+      },
+      href: "/tasks/" ~ task._id ~ "/edit",
+      status: {
+        tag: {
+          text: task.status,
+          classes: statusClass
+        }
+      }
+    }
+  ]) %}
+{% endfor %}
+
+{% block content %}
+
+  {{ govukBackLink({
+    text: "Back",
+    href: "/"
+  }) }}
+
+  <h1 class="govuk-heading-xl">Task list</h1>
+
+  {% if error %}
+    <p class="govuk-error-message">{{ error }}</p>
+  {% endif %}
+
+  {% if taskItems.length == 0 %}
+    {{ govukInsetText({
+      text: "There are no tasks to display"
+    }) }}
+  {% else %}
+    <p class="govuk-body">Select a task to view or update its details</p>
+  {% endif %}
+
+  {{ govukTaskList({
+    idPrefix: "tasks",
+    items: taskItems
+  }) }}
+
+  {% if hasPagination %}
+
+    {% set paginationItems = [] %}
+
+    {% for page in 1..totalPages %}
+      {% set paginationItem = {
+        number: page,
+        current: page == currentPage,
+        href: baseUrl ~ page
+      } %}
+
+      {% set paginationItems = paginationItems | merge([paginationItem]) %}
+    {% endfor %}
+
+    {{ govukPagination(paginationOptions) }}
+
+  {% endif %}
+
+  {{ govukButton({
+    text: "Add new task",
+    href: "/tasks/new"
+  }) }}
+
+{% endblock %}

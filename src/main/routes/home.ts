@@ -1,16 +1,34 @@
-import { Application } from 'express';
-import axios from 'axios';
+import { ROUTES, TASKS_ENDPOINT, VIEWS } from '../constants';
 
-export default function (app: Application): void {
-  app.get('/', async (req, res) => {
+import axios from 'axios';
+import { Application, Request, Response } from 'express';
+
+export default (app: Application): void => {
+  app.get(ROUTES.HOME, async (req: Request, res: Response) => {
     try {
-      // An example of connecting to the backend (a starting point)
-      const response = await axios.get('http://localhost:4000/get-example-case');
-      console.log(response.data);
-      res.render('home', { "example": response.data });
+      const response = await axios.get(TASKS_ENDPOINT);
+      const taskCount = response.data.length;
+      res.render(VIEWS.HOME, { taskCount });
     } catch (error) {
       console.error('Error making request:', error);
-      res.render('home', {});
+
+      let errorMessage = 'Something went wrong';
+
+      if (axios.isAxiosError(error)) {
+        // axios error type guards
+        if (error.response) {
+          errorMessage = `API responded with status ${error.response.status}: ${error.response.statusText}`;
+        } else if (error.request) {
+          errorMessage = 'No response received from the Task service API';
+        } else {
+          errorMessage = error.message;
+        }
+      } else if (error instanceof Error) {
+        // fallback for other Errors
+        errorMessage = error.message;
+      }
+
+      res.render(VIEWS.ERROR, { error: errorMessage });
     }
   });
-}
+};
