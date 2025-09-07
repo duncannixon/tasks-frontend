@@ -1,5 +1,5 @@
 {% extends "template.njk" %}
-{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{%- from "govuk/components/back-link/macro.njk" import govukBackLink -%}
 
 {% block content %}
 {{ govukBackLink({ text: "Back", href: "/tasks/" ~ task._id ~ "/edit" }) }}

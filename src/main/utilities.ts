@@ -1,5 +1,4 @@
-import { ITask } from '../../../task-api/src/models/task';
-
+import { ITask } from './types/Task';
 import { IPaginationItem } from './types/types';
 
 const FIRST_PAGE = 1;

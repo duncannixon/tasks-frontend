@@ -1,4 +1,4 @@
-import { ITask } from '../../../../task-api/src/models/task';
+import { ITask } from '../../main/types/Task';
 import {
   buildErrorList,
   buildPaginationItems,

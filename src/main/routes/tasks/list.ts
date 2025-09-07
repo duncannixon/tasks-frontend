@@ -1,6 +1,6 @@
-import { ITask } from '../../../../../task-api/src/models/task';
 import { ROUTES, TASKS_ENDPOINT, VIEWS } from '../../constants';
-import { IPaginationOptions } from '../../types/types';
+import { ITask } from '../../types/Task';
+import { IPaginationOptions, ISummaryListRow } from '../../types/types';
 import {
   buildPaginationItems,
   calculateTotalPages,
@@ -17,6 +17,44 @@ const DEFAULT_PAGE = 1;
 const TASK_LIST_TEMPLATE = VIEWS.TASK_LIST;
 const TASK_LIST_ROUTE = ROUTES.TASK_LIST;
 
+const statusTagClass = (status?: string) => {
+  if (!status) {
+    return 'govuk-tag';
+  }
+
+  switch (status.toLowerCase()) {
+    case 'complete':
+      return 'govuk-tag--green';
+    case 'in progress':
+      return 'govuk-tag--blue';
+    case 'pending':
+      return 'govuk-tag--yellow';
+    default:
+      return 'govuk-tag';
+  }
+};
+
+export const buildSummaryListRows = (tasks: ITask[]): ISummaryListRow[] =>
+  tasks
+    .filter((task) => task.status?.toLowerCase() !== 'overdue') // remove overdue tasks
+    .map((task) => ({
+      key: {
+        html: `<a href="/tasks/${task._id}/edit" class="govuk-link">${task.title}</a>`,
+      },
+      value: {
+        html: `<a href="/tasks/${task._id}/edit" class="govuk-link">${task.description}</a>`,
+      },
+      actions: {
+        items: [
+          {
+            href: `/tasks/${task._id}/edit`,
+            visuallyHiddenText: task.title,
+            html: `<span class="govuk-tag ${statusTagClass(task.status)}">${task.status ?? ''}</span>`,
+          },
+        ],
+      },
+    }));
+
 export default (app: Application): void => {
   app.get(TASK_LIST_ROUTE, async (req: Request, res: Response) => {
     const currentPage = parseInt(req.query.page as string) || DEFAULT_PAGE;
@@ -27,6 +65,8 @@ export default (app: Application): void => {
 
       const totalTasks = tasks.length;
       const paginatedTasks = getTasksForCurrentPage(tasks, currentPage);
+      const summaryListRows = buildSummaryListRows(paginatedTasks);
+
       const totalPages = calculateTotalPages(totalTasks);
 
       const paginationOptions: IPaginationOptions = {
@@ -48,7 +88,7 @@ export default (app: Application): void => {
       }
 
       res.render(TASK_LIST_TEMPLATE, {
-        tasks: paginatedTasks,
+        summaryListRows,
         hasPagination: hasPagination(totalTasks),
         paginationOptions,
       });

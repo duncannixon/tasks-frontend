@@ -10,6 +10,22 @@ export interface IPaginationOptions {
   items: IPaginationItem[];
 }
 
+export interface ISummaryListRow {
+  key: {
+    html: string;
+  };
+  value: {
+    html: string;
+  };
+  actions: {
+    items: {
+      href: string;
+      visuallyHiddenText: string;
+      html: string;
+    }[];
+  };
+}
+
 export interface Task {
   _id?: string;
   title: string;
