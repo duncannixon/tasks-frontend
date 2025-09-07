@@ -1,5 +1,13 @@
 {% extends "template.njk" %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
 {% block content %}
   <h1 class="govuk-heading-xl">Something went wrong</h1>
+
+  {% if error %}
+    {{ govukWarningText({
+      text: error,
+      iconFallbackText: "Warning"
+    }) }}
+  {% endif %}
 {% endblock %}

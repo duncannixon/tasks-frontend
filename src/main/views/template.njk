@@ -1,7 +1,24 @@
 {% extends "govuk/template.njk" %}
 
+{% block header %}
+  {{ govukHeader({
+    homepageUrl: "/",
+    serviceName: "HMCTS Case Management",
+    serviceUrl: "/"
+  }) }}
+{% endblock %}
+
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+
 {% block head %}
   {% include "webpack/css.njk" %}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukPhaseBanner({
+    tag: { text: "Alpha" },
+    html: 'This is a new service. Help us improve it and <a class="govuk-link" href="#">give your feedback by email</a>.'
+  }) }}
 {% endblock %}
 
 {% block bodyEnd %}

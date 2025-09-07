@@ -1,0 +1,160 @@
+{% extends "template.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+
+  {{ govukBackLink({ text: "Back", href: "/tasks/list" }) }}
+
+  {% if errors and errors | length %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: errorList
+    }) }}
+  {% endif %}
+
+  <form method="post" action="{% if isEdit %}/tasks/{{ task._id }}/edit{% else %}/tasks/new{% endif %}">
+
+    {% if isEdit %}
+      <div class="govuk-!-text-align-right">
+        <a href="/tasks/{{ task._id }}/delete" class="govuk-button govuk-button--warning">
+          Delete task
+        </a>
+      </div>
+    {% endif %}
+
+    {% if isEdit === true %}
+      {% set headingText = "Edit task" %}
+    {% else %}
+      {% set headingText = "Create a new task" %}
+    {% endif %}
+
+    {% call govukFieldset({ legend: { text: headingText, classes: "govuk-fieldset__legend--xl" } }) %}
+
+    {% if errors.title %}
+      {% set titleErrorMessage = {
+        text: errors.title
+      } %}
+    {% endif %}
+
+    {{ govukInput({
+        label: { text: "Task title" },
+        id: "title",
+        name: "title",
+        value: task.title | default(''),
+        required: true,
+        errorMessage: titleErrorMessage
+      }) }}
+
+    {% if errors.description %}
+      {% set descriptionErrorMessage = {
+        text: errors.description
+      } %}
+    {% endif %}
+
+    {{ govukInput({
+        label: { text: "Description (optional)" },
+        id: "description",
+        name: "description",
+        value: task.description | default(''),
+        errorMessage: descriptionErrorMessage
+      }) }}
+
+    {{ govukSelect({
+        label: { text: "Status" },
+        id: "status",
+        name: "status",
+        items: [
+          { text: "Pending", value: "pending", selected: isEdit and task.status == 'pending' },
+          { text: "In progress", value: "in-progress", selected: isEdit and task.status == 'in-progress' },
+          { text: "Complete", value: "complete", selected: isEdit and task.status == 'complete' }
+        ]
+      }) }}
+
+    {% if errors.dueDateDay %}
+      {% set dueDateErrorMessage = {
+        text: errors.dueDateDay
+      } %}
+    {% endif %}
+
+    {% if errors.time %}
+      {% set timeErrorMessage = {
+        text: errors.time
+      } %}
+    {% endif %}
+
+    {{ govukFieldset({
+        legend: {
+          text: "When is the due date?",
+          classes: "govuk-fieldset__legend--m"
+        },
+        html: (
+          govukDateInput({
+            id: "due-date-day",
+            namePrefix: "due-date",
+            hint: {
+              text: "For example, 31 3 2025"
+            },
+            items: [
+              {
+                id: "dueDateDay",
+                name: "day",
+                classes: "govuk-input--width-2",
+                autocomplete: "due-date-day",
+                value: task.dueDate.day | default('')
+              },
+              {
+                id: "dueDateMonth",
+                name: "month",
+                classes: "govuk-input--width-2",
+                autocomplete: "due-date-month",
+                value: task.dueDate.month | default('')
+              },
+              {
+                id: "dueDateYear", 
+                name: "year",
+                classes: "govuk-input--width-4",
+                autocomplete: "due-date-year",
+                value: task.dueDate.year | default('')
+              }
+            ],
+            errorMessage: dueDateErrorMessage
+          })
+          +
+          govukInput({
+            id: "time",
+            name: "time",
+            classes: "govuk-input--width-5",
+            label: {
+              text: "Time"
+            },
+            hint: {
+              text: "Enter the time in 24-hour format (hh:mm), for example 14:30"
+            },
+            value: task.time,
+            errorMessage: timeErrorMessage
+          })
+        )
+      }) }}
+
+    {% endcall %}
+
+    <div class="govuk-button-group">
+      {% if isEdit %}
+        {% set submitText = "Save changes" %}
+      {% else %}
+        {% set submitText = "Save task" %}
+      {% endif %}
+
+      {{ govukButton({ text: submitText, type: "submit" }) }}
+
+      <a class="govuk-link" href="/tasks/list">Cancel</a>
+    </div>
+
+  </form>
+{% endblock %}

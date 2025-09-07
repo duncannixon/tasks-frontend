@@ -1,5 +1,5 @@
 // better handling of unhandled exceptions
-process.on('unhandledRejection', reason => {
+process.on('unhandledRejection', (reason) => {
   throw reason;
 });
 
